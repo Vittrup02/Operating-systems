@@ -1,0 +1,35 @@
+"C:\Program Files\JetBrains\CLion 2023.3.4\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2023.3.4/bin/ninja/win/x64/ninja.exe" -G Ninja -S \\wsl.localhost\Ubuntu\root\assignment_1 -B \\wsl.localhost\Ubuntu\root\assignment_1\cmake-build-debug
+-- The C compiler identification is unknown
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - failed
+-- Check for working C compiler: C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/gcc.exe
+-- Check for working C compiler: C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/gcc.exe - broken
+CMake Error at C:/Program Files/JetBrains/CLion 2023.3.4/bin/cmake/win/x64/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:67 (message):
+  The C compiler
+
+    "C:/Program Files/JetBrains/CLion 2023.3.4/bin/mingw/bin/gcc.exe"
+
+  is not able to compile a simple test program.
+
+  It fails with the following output:
+
+    Change Dir: '//wsl.localhost/Ubuntu/root/assignment_1/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-x4de76'
+    
+    Run Build Command(s): "C:/Program Files/JetBrains/CLion 2023.3.4/bin/ninja/win/x64/ninja.exe" -v cmTC_26589
+    [1/2] C:\PROGRA~1\JETBRA~1\CLION2~1.4\bin\mingw\bin\gcc.exe    -o CMakeFiles\cmTC_26589.dir\testCCompiler.c.obj -c \\wsl.localhost\Ubuntu\root\assignment_1\cmake-build-debug\CMakeFiles\CMakeScratch\TryCompile-x4de76\testCCompiler.c
+    FAILED: CMakeFiles/cmTC_26589.dir/testCCompiler.c.obj 
+    C:\PROGRA~1\JETBRA~1\CLION2~1.4\bin\mingw\bin\gcc.exe    -o CMakeFiles\cmTC_26589.dir\testCCompiler.c.obj -c \\wsl.localhost\Ubuntu\root\assignment_1\cmake-build-debug\CMakeFiles\CMakeScratch\TryCompile-x4de76\testCCompiler.c
+    Assembler messages:
+    Fatal error: can't create CMakeFiles\cmTC_26589.dir\testCCompiler.c.obj: Invalid argument
+    ninja: build stopped: subcommand failed.
+    
+    
+
+  
+
+  CMake will not be able to correctly generate this project.
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+-- Configuring incomplete, errors occurred!
