@@ -64,8 +64,16 @@ void simple_init() {
       first->size = (aligned_memory_end-aligned_memory_start) -2 * sizeof(BlockHeader);
       first->next = (BlockHeader *)(aligned_memory_start + sizeof(BlockHeader) + first->size);
       /* TODO: Place first and last blocks and set links and free flags properly */
+      last = first->next;
+      last->size = 0;
+      last->next = NULL;
+
+      SET_FREE(first,1);
+      SET_FREE(last,0);
+
+
+      current = first;  
     }
-    current = first;     
   } 
 }
 
