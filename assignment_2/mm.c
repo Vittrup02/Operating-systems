@@ -70,8 +70,11 @@ void* simple_malloc(size_t size) {
     if (first == NULL) return NULL;
   }
 
-  size_t aligned_size = size;  /* TODO: Alignment */
 
+  size_t aligned_size = size;  /* TODO: Alignment */
+  if (size%8!= 0) {
+    aligned_size = size + (8-size%8);
+  }
   /* Search for a free block */
   BlockHeader * search_start = current;
   do {
