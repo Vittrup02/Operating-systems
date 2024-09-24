@@ -16,7 +16,7 @@
 
 typedef struct header {
   struct header * next;     // Bit 0 is used to indicate free block 
-  int size;
+  size_t size;
   uint64_t user_block[0];   // Standard trick: Empty array to make sure start of user block is aligned
 } BlockHeader;
 
