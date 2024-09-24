@@ -20,8 +20,15 @@ typedef struct header {
 } BlockHeader;
 
 /* Macros to handle the free flag at bit 0 of the next pointer of header pointed at by p */
-#define GET_NEXT(p)    (void *) (p->next)    /* TODO: Mask out free flag */
-#define SET_NEXT(p,n)  p->next = (void *) n  /* TODO: Preserve free flag */
+#define FREE_FLAG_MASK  (1)             // Mask to isolate the free flag in the LSB
+#define POINTER_MASK    (~FREE_FLAG_MASK) // Mask to clear the LSB (pointer portion)
+
+// Macro to get the next pointer, masking out the free flag
+#define GET_NEXT(p)     ((void *)((uintptr_t)(p->next) & POINTER_MASK))
+
+// Macro to set the next pointer, preserving the free flag
+#define SET_NEXT(p, n)  p->next = (void *)(((uintptr_t)(p->next) & FREE_FLAG_MASK) | ((uintptr_t)(n) & POINTER_MASK))
+
 #define GET_FREE(p)    (uint8_t) ( (uintptr_t) (p->next) & 0x1 )   /* OK -- do not change */
 #define SET_FREE(p,f)  /* TODO: Set free bit of p->next to f */
 #define SIZE(p)        (size_t) ( 0 ) /* TODO: Caluculate size of block from p and p->next */ 
