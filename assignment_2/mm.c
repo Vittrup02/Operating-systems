@@ -16,6 +16,7 @@
 
 typedef struct header {
   struct header * next;     // Bit 0 is used to indicate free block 
+  int size;
   uint64_t user_block[0];   // Standard trick: Empty array to make sure start of user block is aligned
 } BlockHeader;
 
@@ -60,7 +61,8 @@ void simple_init() {
     /* Check that we have room for at least one free block and an end header */
     if (aligned_memory_start + 2*sizeof(BlockHeader) + MIN_SIZE <= aligned_memory_end) {
       first = (BlockHeader *) aligned_memory_start;
-      
+      first->size = (aligned_memory_end-aligned_memory_start) -2 * sizeof(BlockHeader);
+      first->next = (BlockHeader *)(aligned_memory_start + sizeof(BlockHeader) + first->size);
       /* TODO: Place first and last blocks and set links and free flags properly */
     }
     current = first;     
