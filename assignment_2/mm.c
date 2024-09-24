@@ -48,11 +48,11 @@ static BlockHeader * current = NULL;
 void simple_init() {
   uintptr_t aligned_memory_start = memory_start;  /* TODO: Alignment */
   if (aligned_memory_start%MIN_SIZE != 0) {
-    aligned_memory_start = memory_start + (MIN_SIZE-memory_start%MIN_SIZE);
-  }
+    aligned_memory_start += (MIN_SIZE - (aligned_memory_start % MIN_SIZE));
+  } 
   uintptr_t aligned_memory_end   = memory_end;    /* TODO: Alignment */
   if (aligned_memory_end%MIN_SIZE != 0) {
-    aligned_memory_end = memory_start + (MIN_SIZE-memory_end%MIN_SIZE);
+    aligned_memory_end -= (aligned_memory_end % MIN_SIZE);
   }
   BlockHeader * last;
 
@@ -61,10 +61,10 @@ void simple_init() {
     /* Check that we have room for at least one free block and an end header */
     if (aligned_memory_start + 2*sizeof(BlockHeader) + MIN_SIZE <= aligned_memory_end) {
       first = (BlockHeader *) aligned_memory_start;
-      first->size = (aligned_memory_end-aligned_memory_start) -2 * sizeof(BlockHeader);
+      first->size = (aligned_memory_end-aligned_memory_start) - 2 * sizeof(BlockHeader);
       first->next = (BlockHeader *)(aligned_memory_start + sizeof(BlockHeader) + first->size);
       /* TODO: Place first and last blocks and set links and free flags properly */
-      last = first->next;
+      BlockHeader *last = first->next;
       last->size = 0;
       last->next = NULL;
 
