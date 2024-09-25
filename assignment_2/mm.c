@@ -127,6 +127,14 @@ void simple_free(void * ptr) {
     /* Block is not in use -- probably an error */
     return;
   }
+  current = ptr;
+  do {
+
+    SET_FREE(current, FREE_FLAG_MASK);
+    
+    current = GET_NEXT(current);
+
+  } while (current != last);
 
   /* TODO: Free block */
 
