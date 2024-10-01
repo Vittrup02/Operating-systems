@@ -38,6 +38,7 @@ typedef struct header {
 
 static BlockHeader * first = NULL;
 static BlockHeader * current = NULL;
+static BlockHeader * last = NULL;
 
 /**
  * @name    simple_init
@@ -45,70 +46,59 @@ static BlockHeader * current = NULL;
  *
  */
 void simple_init() {
-  uintptr_t aligned_memory_start = memory_start;  /* TODO: Alignment */
-  
-  uintptr_t aligned_memory_end   = memory_end;    /* TODO: Alignment */
-  BlockHeader * last;
+    uintptr_t aligned_memory_start = (memory_start + 7) & ~0x7;  // Align to 8-byte boundary
+    uintptr_t aligned_memory_end = memory_end & ~0x7;             // Align to 8-byte boundary
 
-  /* Already initalized ? */
-  if (first == NULL) {
-    /* Check that we have room for at least one free block and an end header */
-    if (aligned_memory_start + 2*sizeof(BlockHeader) + MIN_SIZE <= aligned_memory_end) {
-      /* TODO: Place first and last blocks and set links and free flags properly */
+    if (aligned_memory_start + 2 * sizeof(BlockHeader) + MIN_SIZE <= aligned_memory_end) {
+        first = (BlockHeader *)aligned_memory_start;
+        last = (BlockHeader *)(aligned_memory_end - sizeof(BlockHeader));  // Set global last
+        SET_NEXT(first, last);
+        SET_FREE(first, 1);
+
+        SET_NEXT(last, first);  // Create circular link
+        SET_FREE(last, 0);
+
+        current = first;
     }
-    current = first;     
-  } 
 }
 
 
-/**
- * @name    simple_malloc
- * @brief   Allocate at least size contiguous bytes of memory and return a pointer to the first byte.
- *
- * This function should behave similar to a normal malloc implementation. 
- *
- * @param size_t size Number of bytes to allocate.
- * @retval Pointer to the start of the allocated memory or NULL if not possible.
- *
- */
 void* simple_malloc(size_t size) {
-  
-  if (first == NULL) {
-    simple_init();
-    if (first == NULL) return NULL;
-  }
-
-
-  size_t aligned_size = size;  /* TODO: Alignment */
-  if (size%8!= 0) {
-    aligned_size = size + (8-size%8);
-  }
-  /* Search for a free block */
-  BlockHeader * search_start = current;
-  do {
- 
-    if (GET_FREE(current)) {
-
-      /* Possibly coalesce consecutive free blocks here */
-
-      /* Check if free block is large enough */
-      if (SIZE(current) >= aligned_size) {
-        /* Will the remainder be large enough for a new block? */
-        if (SIZE(current) - aligned_size < sizeof(BlockHeader) + MIN_SIZE) {
-          /* TODO: Use block as is, marking it non-free*/
-        } else {
-          /* TODO: Carve aligned_size from block and allocate new free block for the rest */
-        }
-        
-        return (void *) NULL; /* TODO: Return address of current's user_block and advance current */
-      }
+    if (first == NULL) {
+        simple_init();
+        if (first == NULL) return NULL;
     }
 
-    current = GET_NEXT(current);
-  } while (current != search_start);
+    size_t aligned_size = (size + 7) & ~0x7;  // Align to 8-byte boundary
 
- /* None found */
-  return NULL;
+    BlockHeader *search_start = current;
+
+    do {
+        if (GET_FREE(current)) {
+            if (SIZE(current) >= aligned_size) {
+                size_t remaining_size = SIZE(current) - aligned_size - sizeof(BlockHeader);
+
+                if (remaining_size >= MIN_SIZE) {
+                    // Split the block
+                    BlockHeader *new_block = (BlockHeader *)((uintptr_t)current + sizeof(BlockHeader) + aligned_size);
+                    SET_NEXT(new_block, GET_NEXT(current));
+                    SET_FREE(new_block, 1);
+
+                    SET_NEXT(current, new_block);
+                }
+
+                // Mark current block as not free
+                SET_FREE(current, 0);
+                current = GET_NEXT(current);
+                
+                return (void *)(current->user_block);
+            }
+        }
+
+        current = GET_NEXT(current);
+    } while (current != search_start);
+
+    return NULL;
 }
 
 
@@ -122,23 +112,22 @@ void* simple_malloc(size_t size) {
  *
  */
 void simple_free(void * ptr) {
-  BlockHeader * block = NULL; /* TODO: Find block corresponding to ptr */
-  if (GET_FREE(block)) {
-    /* Block is not in use -- probably an error */
-    return;
-  }
-  current = ptr;
-  do {
+    BlockHeader * block = (BlockHeader *)((uintptr_t)ptr - sizeof(BlockHeader));  // Find the block for the given pointer
 
-    SET_FREE(current, FREE_FLAG_MASK);
-    
-    current = GET_NEXT(current);
+    if (GET_FREE(block)) {
+        // Block is already free, probably an error
+        return;
+    }
 
-  } while (current != last);
+    SET_FREE(block, 1);  // Mark the block as free
 
-  /* TODO: Free block */
-
-  /* Possibly coalesce consecutive free blocks here */
+    // Possibly coalesce consecutive free blocks here
+    BlockHeader *next_block = GET_NEXT(block);
+    if (GET_FREE(next_block)) {
+        // Coalesce the current block with the next one if it's free
+        SET_NEXT(block, GET_NEXT(next_block));
+    }
 }
+
 
 
