@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 
+#include "mm_aux.c"
 #include "mm.h"
 
 
