@@ -75,23 +75,27 @@ void* simple_malloc(size_t size) {
 
     do {
         if (GET_FREE(current)) {
-            if (SIZE(current) >= aligned_size) {
+            if (SIZE(current) >= aligned_size + sizeof(BlockHeader)) {
                 size_t remaining_size = SIZE(current) - aligned_size - sizeof(BlockHeader);
 
-                if (remaining_size >= MIN_SIZE) {
-                    // Split the block
+                if (remaining_size >= MIN_SIZE + sizeof(BlockHeader)) {
+                    // Split the block if there's enough space left for a new block
                     BlockHeader *new_block = (BlockHeader *)((uintptr_t)current + sizeof(BlockHeader) + aligned_size);
                     SET_NEXT(new_block, GET_NEXT(current));
                     SET_FREE(new_block, 1);
-
                     SET_NEXT(current, new_block);
                 }
 
                 // Mark current block as not free
                 SET_FREE(current, 0);
+
+                // Return the pointer to the user block
+                void *user_block = (void *)(current->user_block);
+
+                // Move to the next block for future allocations
                 current = GET_NEXT(current);
-                
-                return (void *)(current->user_block);
+
+                return user_block;
             }
         }
 
@@ -101,33 +105,36 @@ void* simple_malloc(size_t size) {
     return NULL;
 }
 
+void simple_free(void *ptr) {
+    if (!ptr) return;
 
-/**
- * @name    simple_free
- * @brief   Frees previously allocated memory and makes it available for subsequent calls to simple_malloc
- *
- * This function should behave similar to a normal free implementation. 
- *
- * @param void *ptr Pointer to the memory to free.
- *
- */
-void simple_free(void * ptr) {
-    BlockHeader * block = (BlockHeader *)((uintptr_t)ptr - sizeof(BlockHeader));  // Find the block for the given pointer
+    BlockHeader *block = (BlockHeader *)((uintptr_t)ptr - sizeof(BlockHeader));  // Find the block for the given pointer
 
     if (GET_FREE(block)) {
-        // Block is already free, probably an error
+        // Block is already free, return to avoid double free
         return;
     }
 
     SET_FREE(block, 1);  // Mark the block as free
 
-    // Possibly coalesce consecutive free blocks here
+    // Coalesce with next block if it's free
     BlockHeader *next_block = GET_NEXT(block);
     if (GET_FREE(next_block)) {
-        // Coalesce the current block with the next one if it's free
+        // Merge with the next block
         SET_NEXT(block, GET_NEXT(next_block));
     }
+
+    // Coalesce with previous block if it's free
+    BlockHeader *prev_block = first;
+    while (GET_NEXT(prev_block) != block && prev_block != last) {
+        prev_block = GET_NEXT(prev_block);
+    }
+
+    if (GET_FREE(prev_block)) {
+        SET_NEXT(prev_block, GET_NEXT(block));  // Merge the previous block with the current one
+    }
 }
+
 
 
 
