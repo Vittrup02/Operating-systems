@@ -3,12 +3,11 @@
  * @Author 02335 team
  * @date   September, 2024
  * @brief  Memory management skeleton.
- * 
+ *
  */
 
 #include <stdint.h>
 
-#include "mm_aux.c"
 #include "mm.h"
 
 
@@ -16,7 +15,7 @@
 /* Proposed data structure elements */
 
 typedef struct header {
-  struct header * next;     // Bit 0 is used to indicate free block 
+  struct header * next;     // Bit 0 is used to indicate free block
   uint64_t user_block[0];   // Standard trick: Empty array to make sure start of user block is aligned
 } BlockHeader;
 
@@ -135,7 +134,4 @@ void simple_free(void *ptr) {
         SET_NEXT(prev_block, GET_NEXT(block));  // Merge the previous block with the current one
     }
 }
-
-
-
 
