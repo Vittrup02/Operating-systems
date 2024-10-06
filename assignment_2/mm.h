@@ -6,9 +6,20 @@
  *
  */
 
+#ifndef MM_H
+#define MM_H
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+
+/* Forward declaration of BlockHeader */
+typedef struct header BlockHeader;
+
+extern BlockHeader *first;
+extern BlockHeader *current;
+extern const uintptr_t memory_start;
+extern const uintptr_t memory_end;
 
 
 /**
@@ -27,19 +38,6 @@ void simple_free(void * ptr);
 
 
 /**
- * @name    The lowest address of the memory you will manage
- * @brief   This points to the lowest address of memory you will manage
- */
-extern const uintptr_t memory_start;
-
-
-/**
- * @name    The limit of the memory you will manage
- * @brief   This points to the first address of memory you will NOT manage
- */
-extern const uintptr_t memory_end;
-
-/**
  * @name    simple_macro_test
  * @brief   Makes an internal test of the given macros
  * @retval  0 if ok, otherwise a positive number indicating the error cause
@@ -52,4 +50,4 @@ int simple_macro_test(void);
  */
 void simple_block_dump(void);
 
-
+#endif /* MM_H */

@@ -36,9 +36,9 @@ typedef struct header {
 #define MIN_SIZE     (8)   // A block should have at least 8 bytes available for the user
 
 
-static BlockHeader * first = NULL;
-static BlockHeader * current = NULL;
-static BlockHeader * last = NULL;
+BlockHeader *first = NULL;
+BlockHeader *current = NULL;
+BlockHeader *last = NULL;
 
 /**
  * @name    simple_init
