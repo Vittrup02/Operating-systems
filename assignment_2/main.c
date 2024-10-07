@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mm.h"
 // A structure to represent a stack
 struct StackNode {
     int data;
@@ -14,7 +15,7 @@ struct StackNode* newNode(int data)
 {
     struct StackNode* stackNode =
             (struct StackNode*)
-                    malloc(sizeof(struct StackNode));
+                    simple_malloc(sizeof(struct StackNode));
     stackNode->data = data;
     stackNode->next = NULL;
     return stackNode;
@@ -39,8 +40,7 @@ int pop(struct StackNode** root)
     struct StackNode* temp = *root;
     *root = (*root)->next;
     int popped = temp->data;
-    free(temp);
-
+    simple_free(temp);
     return popped;
 }
 
@@ -80,7 +80,7 @@ int main() {
     }
 
     // Allocate memory for stack elements
-    stack_elements = (int*)malloc(stack_size * sizeof(int));
+    stack_elements = (int*)simple_malloc(stack_size * sizeof(int));
     if (!stack_elements) {
         return -1; // Handle memory allocation failure
     }
@@ -104,7 +104,7 @@ int main() {
     write_char('\n');
 
     // Clean up
-    free(stack_elements);
+    simple_free(stack_elements);
     return 0;
 }
 
