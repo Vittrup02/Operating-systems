@@ -1,4 +1,7 @@
 
+/* Test routines to be included at the end of mm.c */
+
+
 /**
  * @name    simple_macro_test
  * @brief   Makes an internal test of the given macros
