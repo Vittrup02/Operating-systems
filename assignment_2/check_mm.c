@@ -48,12 +48,12 @@ START_TEST (test_simple_allocation)
 {
   int *ptr1;
 
-  ptr1 = MALLOC(10 * sizeof(int));
+  ptr1 = simple_malloc(10 * sizeof(int));
 
 /* Test whether each pointer have unique addresses*/
   ck_assert(ptr1 != 0);
 
-  FREE(ptr1);
+  simple_free(ptr1);
 }
 
 
@@ -68,14 +68,14 @@ START_TEST (test_simple_unique_addresses)
   int *ptr1;
   int *ptr2;
 
-  ptr1 = MALLOC(10 * sizeof(int));
-  ptr2 = MALLOC(10 * sizeof(int));
+  ptr1 = simple_malloc(10 * sizeof(int));
+  ptr2 = simple_malloc(10 * sizeof(int));
 
 /* Test whether each pointer have unique addresses*/
   ck_assert(ptr1 + 10 <= ptr2 || ptr2 + 10 <= ptr1);
 
-  FREE(ptr1);
-  FREE(ptr2);
+  simple_free(ptr1);
+  simple_free(ptr2);
 }
 
 
@@ -166,7 +166,7 @@ START_TEST (test_memory_exerciser)
     if ((blocks[clock].size>0) && (blocks[clock].size<(24*1024*1024))) {
 
 /* Try to allocate memory. */
-      addr = MALLOC(blocks[clock].size);
+      addr = simple_malloc(blocks[clock].size);
 
 /* Check if it was successful. */
       ck_assert_msg(addr != NULL, "Memory allocation failed!");
@@ -231,7 +231,7 @@ START_TEST (test_memory_exerciser)
       printf("free [%02d] %d bytes\n", clock, blocks[clock].size);
 #endif
 
-      FREE(blocks[clock].addr);
+      simple_free(blocks[clock].addr);
       total_memory_size-=blocks[clock].size;
 
 /* Mark block as free */
@@ -268,12 +268,74 @@ START_TEST (test_memory_exerciser)
         printf("Checksum failed for block %d: %08x != %08x\n", clock, blocks[clock].crc, sum);
         ck_assert(0);
       }
-      FREE(blocks[clock].addr);
+      simple_free(blocks[clock].addr);
     }
   }
 }
 
 
+END_TEST
+
+/**
+ * @name   Test Next-Fit Strategy
+ * @brief  Verifies that the allocator uses a next-fit strategy.
+ */
+START_TEST (test_next_fit_strategy)
+{
+  // Allocate three blocks of memory
+  void *ptr1 = simple_malloc(0x100); // Allocate 256 bytes
+  void *ptr2 = simple_malloc(0x200); // Allocate 512 bytes
+  void *ptr3 = simple_malloc(0x100); // Allocate 256 bytes
+
+  // Free the first block
+  simple_free(ptr1);
+
+  // Allocate a new block that should fit into the space left by ptr1
+  void *ptr4 = simple_malloc(0x100); // Allocate 256 bytes again
+
+  // Allocate another block
+  void *ptr5 = simple_malloc(0x100); // Allocate another 256 bytes
+
+  // Check if ptr4 did not reuse the space of ptr1 directly, which indicates next-fit
+  // and if ptr5 is different from ptr2, it ensures that next-fit continued the search after ptr3.
+  ck_assert(ptr4 != ptr1);
+  ck_assert(ptr5 != ptr2);
+
+  // Free allocated blocks
+  simple_free(ptr2);
+  simple_free(ptr3);
+  simple_free(ptr4);
+  simple_free(ptr5);
+}
+END_TEST
+
+/**
+ * @name   Test first-fit Strategy
+ * @brief  Verifies that the allocator uses a first fit strategy.
+ */
+START_TEST (test_first_fit_strategy)
+{
+  // Allocate three blocks of memory
+  void *ptr1 = simple_malloc(0x100); // Allocate 256 bytes
+  void *ptr2 = simple_malloc(0x200); // Allocate 512 bytes
+  void *ptr3 = simple_malloc(0x100); // Allocate 256 bytes
+
+  // Free the first block
+  simple_free(ptr1);
+
+  // Allocate a new block that should fit into the space left by ptr1
+  void *ptr4 = simple_malloc(0x100); // Allocate 256 bytes again
+
+  // Check if ptr4 reuse the space of ptr1, which indicates first-fit strategy.
+  ck_assert(ptr4 == ptr1);
+
+  // Free allocated blocks
+  simple_free(ptr2);
+  simple_free(ptr3);
+  simple_free(ptr4);
+  simple_free(ptr5);
+}
+// This test should fail since we use a next fit strategy.
 END_TEST
 
 /**
@@ -290,13 +352,17 @@ Suite* simple_malloc_suite()
   Suite *s = suite_create("simple_malloc");
   TCase *tc_core = tcase_create("Core tests");
   tcase_set_timeout(tc_core, 120);
-  tcase_add_test (tc_core, test_simple_allocation);
-  tcase_add_test (tc_core, test_simple_unique_addresses);
-  tcase_add_test (tc_core, test_memory_exerciser);
+
+  tcase_add_test(tc_core, test_simple_allocation);
+  tcase_add_test(tc_core, test_simple_unique_addresses);
+  tcase_add_test(tc_core, test_memory_exerciser);
+  tcase_add_test(tc_core, test_next_fit_strategy);
+  tcase_add_test(tc_core, test_first_fit_strategy);
 
   suite_add_tcase(s, tc_core);
   return s;
 }
+
 
 
 /**
