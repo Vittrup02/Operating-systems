@@ -58,17 +58,19 @@ int main() {
     int stack_size = 0;
     int *stack_elements = NULL;
 
-    // Process the input until 'q' is received
+    // Process the input until 'q' is received or any invalid character is encountered
     do {
         result = read_char();
         if (result == 'a') {
             push(&root, count);
             count++;
-        } else if(result == 'b') {
+        } else if (result == 'b') {
             count++;
         } else if (result == 'c') {
             pop(&root);
             count++;
+        } else {
+            break;  // Terminate on any character other than 'a', 'b', or 'c'
         }
     } while (result != 'q');  // Loop until 'q' is found
 
@@ -107,4 +109,5 @@ int main() {
     simple_free(stack_elements);
     return 0;
 }
+
 
