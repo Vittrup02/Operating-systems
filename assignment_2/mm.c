@@ -30,8 +30,8 @@ typedef struct header {
 #define SET_NEXT(p, n)  p->next = (void *)(((uintptr_t)(p->next) & FREE_FLAG_MASK) | ((uintptr_t)(n) & POINTER_MASK))
 
 #define GET_FREE(p)    (uint8_t) ( (uintptr_t) (p->next) & 0x1 )   /* OK -- do not change */
-#define SET_FREE(p, f)  p->next = (void *)(((uintptr_t)(p->next) & ~FREE_FLAG_MASK) | ((f) & FREE_FLAG_MASK))
-#define SIZE(p)  ((size_t)((uintptr_t)(GET_NEXT(p)) - (uintptr_t)(p)))
+#define SET_FREE(p, f)  p->next = (void *)(((uintptr_t)(p->next) & POINTER_MASK) | ((f) & FREE_FLAG_MASK))
+#define SIZE(p)  ((size_t)((uintptr_t)(GET_NEXT(p)) - (uintptr_t)(p) - sizeof(BlockHeader)))
 
 #define MIN_SIZE     (8)   // A block should have at least 8 bytes available for the user
 
@@ -135,3 +135,4 @@ void simple_free(void *ptr) {
     }
 }
 
+#include "mm_aux.c"

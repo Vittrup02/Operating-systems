@@ -1,9 +1,4 @@
 
-/* Test routines to be included at the end of mm.c */
-#include <stddef.h>  // For NULL
-#include <stdio.h>   // For printf
-#include "mm.h"      // For BlockHeader and other related definitions
-
 /**
  * @name    simple_macro_test
  * @brief   Makes an internal test of the given macros
