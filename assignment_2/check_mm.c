@@ -333,7 +333,6 @@ START_TEST (test_first_fit_strategy)
   simple_free(ptr2);
   simple_free(ptr3);
   simple_free(ptr4);
-  simple_free(ptr5);
 }
 // This test should fail since we use a next fit strategy.
 END_TEST
