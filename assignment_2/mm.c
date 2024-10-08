@@ -62,7 +62,6 @@ void simple_init() {
     }
 }
 
-
 void* simple_malloc(size_t size) {
     if (first == NULL) {
         simple_init();
@@ -71,7 +70,7 @@ void* simple_malloc(size_t size) {
 
     size_t aligned_size = (size + 7) & ~0x7;  // Align to 8-byte boundary
 
-    BlockHeader *search_start = current;
+    BlockHeader *search_start = current;  // Start from the current block
 
     do {
         if (GET_FREE(current)) {
@@ -93,17 +92,18 @@ void* simple_malloc(size_t size) {
                 void *user_block = (void *)(current->user_block);
 
                 // Move to the next block for future allocations
-                current = GET_NEXT(current);
+                current = GET_NEXT(current);  // Continue from the next block for future allocations
 
                 return user_block;
             }
         }
 
-        current = GET_NEXT(current);
-    } while (current != search_start);
+        current = GET_NEXT(current);  // Move to the next block
+    } while (current != search_start);  // Wrap around if necessary
 
-    return NULL;
+    return NULL;  // No suitable block found
 }
+
 
 void simple_free(void *ptr) {
     if (!ptr) return;

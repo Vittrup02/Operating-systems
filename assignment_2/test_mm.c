@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-
+#include "mm_aux.c"
 #include "mm.h"
 
 
