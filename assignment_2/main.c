@@ -61,6 +61,12 @@ int main() {
     // Process the input until 'q' is received or any invalid character is encountered
     do {
         result = read_char();
+
+        // Skip the newline characters
+        if (result == '\n' || result == '\r') {
+            continue;
+        }
+
         if (result == 'a') {
             push(&root, count);
             count++;
