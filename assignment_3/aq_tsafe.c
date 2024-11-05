@@ -62,6 +62,7 @@ int aq_send(AlarmQueue aq, void* msg, MsgKind kind) {
             }
             queue->messages = new_messages;
             queue->capacity = new_capacity;
+            
         }
         queue->messages[queue->count++] = (Msg*)msg;
     }
