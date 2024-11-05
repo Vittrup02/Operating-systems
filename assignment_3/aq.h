@@ -63,6 +63,6 @@ int aq_size( AlarmQueue aq);
  */
 int aq_alarms( AlarmQueue aq);
 
-
+void aq_destroy(AlarmQueue q);
 #endif /* LIBAQ_H_INCLUDED */
 
