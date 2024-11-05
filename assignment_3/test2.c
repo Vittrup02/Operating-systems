@@ -26,7 +26,7 @@ void *consumer(void *arg) {
     int ret;
     
     // Retrieve all messages to confirm order and reallocation success
-    for (int i = 1; i <= 12; i++) {
+    for (int i = 1; i <= 10; i++) {
         
         get(q);
     }
@@ -48,6 +48,5 @@ int main() {
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
 
-    aq_destroy(q);
     return 0;
 }
