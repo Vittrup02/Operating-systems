@@ -56,14 +56,37 @@ int get(AlarmQueue q) {
   free(m);
   return ret;
 }
+int get_with_value(AlarmQueue q, int val) {
+  Msg * m = malloc(sizeof(Msg));
+  m->value = val;
+  int ret = aq_recv(q, (void**) &m);
+  if       (ret < 0) {
+    printf("WARNING: get got %d\n", ret);
+    return ret;
+  }
+  
+  if ( m == NULL) {
+    printf("ERROR: get got null message of kind %d\n", ret);
+    return AQ_NULL_MSG;
+  }
 
+  printf("Received %s message with value %d\n", (ret ? "ALARM " : "normal"), m->value);
+  ret = m->value;  
+  free(m);
+  return ret;
+}
 int print_sizes(AlarmQueue q) {
   int size = aq_size(q);
   int alarms = aq_alarms(q);
   printf("Current size = %d, alarms = %d\n", size, alarms);
   return size;  
 }
-
+int print_sizes_all(AlarmQueue q) {
+  int size = aq_size(q);
+  int alarms = aq_alarms(q);
+  printf("Current size = %d, alarms = %d\n", size, alarms);
+  return size + alarms;  
+}
 
 /* Sleep in milliseconds */
 void  msleep(int ms) {

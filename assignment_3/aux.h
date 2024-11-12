@@ -19,7 +19,9 @@
 int put_normal(AlarmQueue q, int val);
 int put_alarm(AlarmQueue q, int val);
 int get(AlarmQueue q);
+int get_with_value(AlarmQueue q, int val);
 int print_sizes(AlarmQueue q);
+int print_sizes_all(AlarmQueue q);
 
 /* Sleep in milliseconds */
 void  msleep(int ms);

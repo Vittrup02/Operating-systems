@@ -3,52 +3,44 @@
 #include <pthread.h>
 #include <assert.h>
 #include "aq.h"
-
+#include "aux.h"
+#include<unistd.h>
 // Define the Msg structure if it's not included in aq.h
 typedef struct {
     int value;
     MsgKind kind;
 } Msg;
 
-AlarmQueue q;
+static AlarmQueue q;
 
-void *send_alarm_1(void *arg) {
-    Msg *msg1 = (Msg *)malloc(sizeof(Msg));
-    if (!msg1) {
-        perror("Failed to allocate memory for msg1");
-        pthread_exit(NULL);
-    }
-    msg1->value = 1;
-    msg1->kind = AQ_ALARM;
-    int res = aq_send(q, msg1, AQ_ALARM);
-    assert(res == 0);
-    printf("Thread 1: Sent alarm message 1\n");
+void *send_alarms(void *arg) {
+    put_alarm(q, 13);
+    put_alarm(q, 14);
     return NULL;
 }
 
-void *send_alarm_2(void *arg) {
-    Msg *msg2 = (Msg *)malloc(sizeof(Msg));
-    if (!msg2) {
-        perror("Failed to allocate memory for msg2");
-        pthread_exit(NULL);
+void *send_normal(void *arg) {
+    msleep(1000);
+    for (int i = 1; i <= 10; i++) {
+        
+            put_normal(q, i);
+        }
+        void *msg;
+        int ret;
+        
+        // Retrieve all messages to confirm order and reallocation success
+        return NULL;
     }
-    msg2->value = 2;
-    msg2->kind = AQ_ALARM;
-    int res = aq_send(q, msg2, AQ_ALARM);
-    if (res == AQ_NO_ROOM) {
-        printf("Thread 2: Waiting to send alarm message 2\n");
-    }
-    assert(res == 0 || res == AQ_NO_ROOM);
-    printf("Thread 2: Sent alarm message 2\n");
-    return NULL;
-}
 
 void *receive_alarm(void *arg) {
-    void *msg;
-    int res = aq_recv(q, &msg);
-    assert(res == AQ_ALARM);
-    printf("Thread 3: Received alarm message 1\n");
-    free(msg); // Free the received message
+    msleep(3000);
+    assert(print_sizes_all(q) == 12); //Check if all 12 (normal and alarm) are sent
+    assert(print_sizes(q) == 11); //Check if there are 11 normal 
+    for (int i = 1; i <= 12; i++) {
+        
+        get(q);
+        msleep(500);
+    }
     return NULL;
 }
 
@@ -62,10 +54,10 @@ int main(int argc, char **argv) {
     pthread_t t1, t2, t3;
 
     // Thread 1: Send first alarm
-    pthread_create(&t1, NULL, send_alarm_1, NULL);
+    pthread_create(&t1, NULL, send_alarms, NULL);
 
     // Thread 2: Attempt to send second alarm, should block
-    pthread_create(&t2, NULL, send_alarm_2, NULL);
+    pthread_create(&t2, NULL, send_normal, NULL);
 
     // Thread 3: Receive the first alarm, unblocking Thread 2
     pthread_create(&t3, NULL, receive_alarm, NULL);
