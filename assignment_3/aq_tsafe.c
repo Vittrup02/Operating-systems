@@ -16,6 +16,7 @@ typedef struct {
     int alarm_present;    // Indicator if an alarm is in the queue (0 or 1)
     pthread_mutex_t mutex;    // Mutex for thread-safe access
     pthread_cond_t cond;      // Condition variable for signaling
+    pthread_cond_t alarm_cond;      // Condition variable for alarm signaling
 } AlarmQueueStruct;
 
 #define INITIAL_CAPACITY 4
@@ -36,6 +37,7 @@ AlarmQueue aq_create() {
 
     pthread_mutex_init(&queue->mutex, NULL);
     pthread_cond_init(&queue->cond, NULL);
+    pthread_cond_init(&queue->alarm_cond, NULL);
 
     return (AlarmQueue)queue;
 }
@@ -46,10 +48,13 @@ int aq_send(AlarmQueue aq, void* msg, MsgKind kind) {
     pthread_mutex_lock(&queue->mutex);
 
     if (kind == AQ_ALARM) {
-        if (queue->alarm_present) {
-            pthread_mutex_unlock(&queue->mutex);
-            return AQ_NO_ROOM; // Cannot send another alarm message
+        while (queue->alarm_present) {
+            pthread_cond_wait(&queue->alarm_cond, &queue->mutex); // Wait until there’s a message
         }
+        //if (queue->alarm_present) {
+        //    pthread_mutex_unlock(&queue->mutex);
+        //    return AQ_NO_ROOM; // Cannot send another alarm message
+        //}
         queue->alarm_msg = (Msg*)msg;
         queue->alarm_present = 1;
     } else {
@@ -87,6 +92,7 @@ int aq_recv(AlarmQueue aq, void** msg) {
         queue->alarm_msg = NULL;
         queue->alarm_present = 0;
         pthread_mutex_unlock(&queue->mutex);
+        pthread_cond_signal(&queue->alarm_cond);
         return AQ_ALARM; // Alarm message received
     } else {
         *msg = queue->messages[0];
